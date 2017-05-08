@@ -15,20 +15,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.Window;
-import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 public class MainActivity extends Activity {
     TextView pile;
@@ -42,12 +28,9 @@ public class MainActivity extends Activity {
     int playerScore = 0;
     ArrayList<CompPlayer> comps = new ArrayList<>();
     ArrayList<TextView> AIviews = new ArrayList<>();
-    CompPlayer comp1;
-    CompPlayer comp2;
-    CompPlayer comp3;
-    CompPlayer comp4;
+
     int pileSize = 0;
-    int limit = 50;
+    int limit = 25;
     int takes = 0;
     int roundHighScore = 0;
     boolean playerWon = false;
@@ -79,7 +62,7 @@ public class MainActivity extends Activity {
         setCompLabels();
         pile.setText(Integer.toString(pileSize));
         score.setText("Score: " + Integer.toString(playerScore));
-        remaining.setText("Remaining: "+ Integer.toString(limit));
+        remaining.setText("Remaining: "+ Integer.toString(limit - 1));
         handler.postDelayed(runnable, 750);
 
         alertDialog = new AlertDialog.Builder(MainActivity.this).create();
@@ -97,6 +80,9 @@ public class MainActivity extends Activity {
                         cancelRunnable = false;
                         handler.postDelayed(runnable, 750);
                         playerWon = false;
+                        resetGame();
+                        setCompLabels();
+                        score.setText("Score: " + Integer.toString(playerScore));
                         dialog.dismiss();
 
                     }
@@ -107,13 +93,17 @@ public class MainActivity extends Activity {
 
             @Override
             public boolean onTouch(View view,MotionEvent event) {
+
+                if(event.getAction() == MotionEvent.ACTION_UP){
+
+
                 if(takes < 2 && pileSize != 0){
                     playerScore += pileSize;
                     pileSize = 0;
                     takes++;
                     view.setBackgroundColor(Color.rgb(0,0,0));
                 }
-
+                }
                 return true;
 
             }
@@ -145,7 +135,7 @@ public class MainActivity extends Activity {
     };
     public void update(){
         pileSize++;
-        view.setBackgroundColor(Color.rgb(pileSize*10,pileSize*10,pileSize*10));
+        view.setBackgroundColor(Color.rgb(pileSize*5,pileSize*5,pileSize*32));
         for(int i = 0; i < roundNumber; i++){
 
             if(comps.get(i).takeThePile(pileSize)){
@@ -162,9 +152,10 @@ public class MainActivity extends Activity {
                 Log.d("Scores", Integer.toString(c.score));
                 if(roundHighScore < c.score) roundHighScore = c.score;
 
-                c.score = 0;
-                c.takes = 0;
+                //c.score = 0;
+                //c.takes = 0;
             }
+
             Log.d("roundHighScore", Integer.toString(roundHighScore));
             Log.d("playerScore", Integer.toString(playerScore));
             if(roundHighScore <= playerScore){
@@ -191,18 +182,20 @@ public class MainActivity extends Activity {
             }
             alertDialog.show();
 
+
             remaining.setText("Remaining: "+ Integer.toString(limit));
             cancelRunnable = true;
-            resetGame();
-        }
-        score.setText("Score: " + Integer.toString(playerScore));
 
-        limit--;
+        }
+
         remaining.setText("Remaining: "+ Integer.toString(limit));
+        limit--;
+
         if(randomBool()){
             pileSize = 0;
         }
         pile.setText(Integer.toString(pileSize));
+        score.setText("Score: " + Integer.toString(playerScore));
         setCompLabels();
     }
 
@@ -218,8 +211,14 @@ public class MainActivity extends Activity {
     public void resetGame(){
         takes = 0;
         playerScore = 0;
-        limit = 50;
+        limit = 25;
         pileSize = 0;
+        roundHighScore = 0;
+        for(CompPlayer c: comps){
+
+            c.score = 0;
+            c.takes = 0;
+        }
     }
     public void setCompLabels(){
         int i = 0;
